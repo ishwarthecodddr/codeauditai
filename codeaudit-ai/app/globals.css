@@ -1,12 +1,203 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
 
 :root {
-  color-scheme: dark;
+  --bg-color: #F8F9FA;
+  --text-color: #1A1A1A;
+  --border-color: #E2E8F0;
+  --panel-bg: #FFFFFF;
+  --inset-bg: #F1F5F9;
+  --muted-text: #64748B;
+  --accent-color: #6C63FF;
+  --accent-hover: #5C54E8;
+  --accent-border: rgba(108, 99, 255, 0.28);
+  --active-bg: rgba(108, 99, 255, 0.07);
+  --editor-bg: #FFFFFF;
+  --disabled-bg: #E9ECF1;
+  --disabled-text: #9299A5;
+  
+  --severity-clean-bg: #E6F4EA;
+  --severity-clean-text: #137333;
+  --severity-clean-border: #CEEAD6;
+  
+  --severity-warning-bg: #FEF7E0;
+  --severity-warning-text: #B06000;
+  --severity-warning-border: #FEEFC3;
+  
+  --severity-critical-bg: #FCE8E6;
+  --severity-critical-text: #C5221F;
+  --severity-critical-border: #FAD2CF;
+}
+
+.dark {
+  --bg-color: #0A0A0F;
+  --text-color: #F3F4F6;
+  --border-color: #1F1F29;
+  --panel-bg: #111116;
+  --inset-bg: #0F0F15;
+  --muted-text: #8E8E9F;
+  --accent-color: #6C63FF;
+  --accent-hover: #7A72FF;
+  --accent-border: rgba(108, 99, 255, 0.3);
+  --active-bg: rgba(108, 99, 255, 0.08);
+  --editor-bg: #0D0D12;
+  --disabled-bg: #17171E;
+  --disabled-text: #666676;
+  
+  --severity-clean-bg: rgba(16, 185, 129, 0.1);
+  --severity-clean-text: #10B981;
+  --severity-clean-border: rgba(16, 185, 129, 0.2);
+  
+  --severity-warning-bg: rgba(245, 158, 11, 0.1);
+  --severity-warning-text: #F59E0B;
+  --severity-warning-border: rgba(245, 158, 11, 0.2);
+  
+  --severity-critical-bg: rgba(239, 68, 68, 0.1);
+  --severity-critical-text: #EF4444;
+  --severity-critical-border: rgba(239, 68, 68, 0.2);
 }
 
 body {
-  background-color: #030712; 
-  color: #f3f4f6;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-sans);
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  margin: 0;
+  padding: 0;
+}
+
+.diff-column-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  min-height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--border-color);
+}
+
+.diff-column-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--panel-bg);
+  color: var(--text-color);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.diff-column-title::after {
+  content: "PYTHON";
+  padding: 2px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--muted-text);
+  background: var(--inset-bg);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.code-editor-shell .monaco-editor,
+.code-editor-shell .monaco-diff-editor,
+.code-editor-shell .monaco-editor-background,
+.code-editor-shell .margin {
+  background-color: var(--editor-bg) !important;
+}
+
+.code-editor-shell .monaco-diff-editor .editor.original .view-overlays .current-line,
+.code-editor-shell .monaco-diff-editor .editor.modified .view-overlays .current-line {
+  border: 0 !important;
+}
+
+.code-editor-shell .monaco-editor .line-delete,
+.code-editor-shell .monaco-editor .char-delete {
+  background-color: #3D1F1F !important;
+}
+
+.code-editor-shell .monaco-editor .line-insert,
+.code-editor-shell .monaco-editor .char-insert {
+  background-color: #1A3D2B !important;
+}
+
+.code-editor-shell .monaco-editor .line-delete {
+  border-left: 2px solid #EF4444 !important;
+}
+
+.code-editor-shell .monaco-editor .line-insert {
+  border-left: 2px solid #22C55E !important;
+}
+
+.code-editor-shell .line-numbers {
+  color: var(--muted-text) !important;
+}
+
+.orchestrator-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.orchestrator-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 30px;
+  bottom: -8px;
+  left: 17px;
+  width: 1px;
+  background: var(--border-color);
+}
+
+.orchestrator-step.is-complete {
+  animation: step-complete 150ms ease both;
+}
+
+.orchestrator-step.is-active .orchestrator-step-dot {
+  animation: active-ring 1.5s ease-in-out infinite;
+}
+
+@keyframes step-complete {
+  from { opacity: 0.55; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes active-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.18); }
+  50% { box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.08); }
+}
+
+/* Custom thin scrollbars for sleek dev aesthetic */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-text);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+@media (max-width: 1023px) {
+  .diff-column-title {
+    padding: 0 8px;
+  }
 }

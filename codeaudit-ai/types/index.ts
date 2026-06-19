@@ -1,6 +1,7 @@
 export interface ReviewIssue {
   issue: string;
   severity: "low" | "medium" | "high" | "critical";
+  suggested_fix?: string;
 }
 
 export interface ReviewResult {
