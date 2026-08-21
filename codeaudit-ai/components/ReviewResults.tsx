@@ -138,7 +138,7 @@ export default function ReviewResults({ performance, security, iterationCount }:
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleCopySnippet(iss.suggested_fix, issueId);
+                              handleCopySnippet(iss.suggested_fix!, issueId);
                             }}
                             className="p-1 rounded hover:bg-[var(--panel-bg)] border border-[var(--border-color)] text-[var(--muted-text)] hover:text-[var(--text-color)] transition-all cursor-pointer flex items-center gap-1 text-[10px]"
                             title="Copy Fix Snippet"

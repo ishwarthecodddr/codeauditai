@@ -151,7 +151,8 @@ export default function Dashboard() {
 
     if (ws) ws.close();
 
-    const socket = new WebSocket("ws://localhost:8000/api/ws/review");
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/ws/review";
+    const socket = new WebSocket(wsUrl);
     
     socket.onopen = () => {
       socket.send(
@@ -183,9 +184,9 @@ export default function Dashboard() {
     };
 
     socket.onerror = () => {
-      setStatusMessage("WebSocket connection failed. Verify backend server is running on port 8000.");
+      setStatusMessage("WebSocket connection failed. Verify backend server is running and accessible.");
       setIsEvaluating(false);
-      showToast("WebSocket server unreachable at localhost:8000", "warning");
+      showToast("WebSocket server unreachable", "warning");
     };
 
     setWs(socket);
