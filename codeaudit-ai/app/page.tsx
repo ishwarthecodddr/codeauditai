@@ -6,6 +6,7 @@ import CodeEditor from "@/components/CodeEditor";
 import AgentStatus from "@/components/AgentStatus";
 import ReviewResults from "@/components/ReviewResults";
 import { ReviewResult, WebSocketMessage } from "@/types";
+import { getWebSocketUrl } from "@/lib/api";
 
 const INITIAL_CODE = `def calculate_sum(n):
     result = 0
@@ -151,45 +152,52 @@ export default function Dashboard() {
 
     if (ws) ws.close();
 
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/ws/review";
-    const socket = new WebSocket(wsUrl);
-    
-    socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          source_code: code,
-          language: "python",
-        })
-      );
-    };
-
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data) as WebSocketMessage;
+    const wsUrl = getWebSocketUrl();
+    try {
+      const socket = new WebSocket(wsUrl);
       
-      if (data.type === "status") {
-        setStatusNode(data.node);
-        setStatusMessage(data.message);
-      } else if (data.type === "result") {
-        const res = data as ReviewResult;
-        setResult(res);
-        setIsEvaluating(false);
-        setStatusMessage("Audit complete.");
-        showToast("Audit complete! Review refactored code or press Ctrl+Z to revert.", "success");
-        socket.close();
-      } else if (data.type === "error") {
-        setStatusMessage(`Error: ${data.message || "Something went wrong"}`);
-        setIsEvaluating(false);
-        showToast(`Audit failed: ${data.message}`, "warning");
-      }
-    };
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            source_code: code,
+            language: "python",
+          })
+        );
+      };
 
-    socket.onerror = () => {
-      setStatusMessage("WebSocket connection failed. Verify backend server is running and accessible.");
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data) as WebSocketMessage;
+        
+        if (data.type === "status") {
+          setStatusNode(data.node);
+          setStatusMessage(data.message);
+        } else if (data.type === "result") {
+          const res = data as ReviewResult;
+          setResult(res);
+          setIsEvaluating(false);
+          setStatusMessage("Audit complete.");
+          showToast("Audit complete! Review refactored code or press Ctrl+Z to revert.", "success");
+          socket.close();
+        } else if (data.type === "error") {
+          setStatusMessage(`Error: ${data.message || "Something went wrong"}`);
+          setIsEvaluating(false);
+          showToast(`Audit failed: ${data.message}`, "warning");
+        }
+      };
+
+      socket.onerror = () => {
+        setStatusMessage("WebSocket connection failed. Verify backend server is running and accessible (Render free tier may take ~50s to wake up).");
+        setIsEvaluating(false);
+        showToast("WebSocket server unreachable", "warning");
+      };
+
+      setWs(socket);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Failed to initiate WebSocket connection";
+      setStatusMessage(`Connection Error: ${errMsg}`);
       setIsEvaluating(false);
-      showToast("WebSocket server unreachable", "warning");
-    };
-
-    setWs(socket);
+      showToast(errMsg, "warning");
+    }
   };
 
   const resetAudit = () => {
