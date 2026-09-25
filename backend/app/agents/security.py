@@ -60,5 +60,4 @@ If there are no security vulnerabilities, return an empty list of issues.
             "severity": "medium",
             "suggested_fix": "Ensure GEMINI_API_KEY is configured."
         }]
-        l
     return {"security_vulnerabilities": formatted_issues}
