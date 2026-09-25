@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { startTransition, useEffect, useState, useCallback, useRef } from "react";
 import { Sun, Moon, Sparkles, RotateCcw, Check, Command } from "lucide-react";
 import CodeEditor from "@/components/CodeEditor";
 import AgentStatus from "@/components/AgentStatus";
@@ -58,7 +58,7 @@ export default function Dashboard() {
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "dark" | "light";
     if (savedTheme) {
-      setTheme(savedTheme);
+      startTransition(() => setTheme(savedTheme));
     }
   }, []);
 

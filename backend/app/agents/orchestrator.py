@@ -1,4 +1,5 @@
 import json
+import re
 from google import genai
 from google.genai import types
 from app.core.config import settings
@@ -7,6 +8,21 @@ from app.models.schemas import ArchitectFix
 
 # Initialize Gemini Client
 client = genai.Client(api_key=settings.gemini_api_key or None)
+
+
+def normalize_code(code: str) -> str:
+    """Remove accidental fences and restore escaped line breaks from model output."""
+    normalized = code.strip()
+
+    if "\n" not in normalized and "\\n" in normalized:
+        normalized = normalized.replace("\\r\\n", "\n")
+        normalized = normalized.replace("\\n", "\n")
+        normalized = normalized.replace("\\t", "\t")
+
+    normalized = re.sub(r"^```(?:[a-zA-Z0-9_+-]+)?\s*", "", normalized)
+    normalized = re.sub(r"\s*```$", "", normalized)
+
+    return normalized
 
 async def orchestrator_node(state: AgentState) -> dict:
     """
@@ -52,7 +68,8 @@ Instructions:
 2. Maintain functional parity (the logic must do the same thing, return same outputs for same inputs).
 3. Do not introduce new bugs, lint issues, or syntax errors.
 4. Return the entire corrected code. Do not truncate the code.
-5. Provide a summary of the fixes.
+5. Preserve normal line breaks and indentation. Do not compress multiple statements onto one line.
+6. Return source code with the same readable structure as the input, followed by a summary of the fixes.
 """
 
     try:
@@ -67,7 +84,7 @@ Instructions:
         )
         
         data = json.loads(response.text)
-        updated_code = data.get("updated_code", code)
+        updated_code = normalize_code(data.get("updated_code", code))
         
         # If code didn't change, stop iterating
         review_complete = False
